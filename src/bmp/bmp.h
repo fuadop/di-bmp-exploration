@@ -65,11 +65,24 @@ typedef struct {
 	uint8_t *pixels;
 } bmf_windows_3_t;
 
+/** UTILITY STRUCTURES */
+typedef struct {
+	uint8_t blue;
+	uint8_t green;
+	uint8_t red;
+} pixel_24_bit_t;
+
 bool is_bmp_file(FILE *f);
 uint32_t get_bmp_bi_size(FILE *f);
 
 void decode_to_bmf_os_2(bmf_os_2_t *ptr, FILE *f);
 void decode_to_bmf_windows_3(bmf_windows_3_t *ptr, FILE *f);
+
+pixel_24_bit_t** pixel_data_to_matrix_bmf_os_2(bmf_os_2_t *ptr);
+pixel_24_bit_t** pixel_data_to_matrix_bmf_windows_3(bmf_windows_3_t *ptr);
+
+void free_matrix(pixel_24_bit_t **matrix, uint16_t height);
+pixel_24_bit_t** malloc_matrix(uint16_t height, uint16_t width);
 
 void terminal_print_bmf_os_2(bmf_os_2_t *ptr);
 void terminal_print_bmf_windows_3(bmf_windows_3_t *ptr);

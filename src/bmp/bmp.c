@@ -124,61 +124,133 @@ void terminal_write_headers_bmf_windows_3(bmf_windows_3_t *ptr) {
 	printf("pxlen_bytes=%zu\n", ptr->pxlen);
 }
 
-
-void terminal_print_bmf_os_2(bmf_os_2_t *ptr) {
-	puts("bits_per_pixel value of 24 supported only");
+// returns pixel_24_bit_t[height][width]
+pixel_24_bit_t** pixel_data_to_matrix_bmf_os_2(bmf_os_2_t *ptr) {
+	if (ptr->information_header.bi_bit_count != 24) return NULL;
 
 	size_t bytes_per_row = round_to_next_multiple_of_4(
-		(ptr->information_header.bi_width * ptr->information_header.bi_bit_count) / 8
+		ptr->information_header.bi_width * sizeof(pixel_24_bit_t)
 	);
 
-	if (ptr->information_header.bi_bit_count == 24) {
-		for (uint16_t row = ptr->information_header.bi_height - 1; row >= 0; row--) {
-			size_t row_offset = ptr->pxlen - 
-				((ptr->information_header.bi_height - row) * bytes_per_row);
+	pixel_24_bit_t **matrix = malloc_matrix(
+		ptr->information_header.bi_height,
+		ptr->information_header.bi_width
+	);
 
-			for (uint16_t col = 0; col < ptr->information_header.bi_width; col++) {
-				size_t color_byte_offset = row_offset + (col * 3);
+	for (uint16_t row = 0; row < ptr->information_header.bi_height; row++) {
+		size_t row_offset = bytes_per_row * row;
 
-				uint8_t blue = ptr->pixels[color_byte_offset];
-				uint8_t green = ptr->pixels[color_byte_offset + 1];
-				uint8_t red = ptr->pixels[color_byte_offset + 2];
+		for (uint16_t col = 0; col < ptr->information_header.bi_width; col++) {
+			size_t pixel_offset = row_offset + (col * 3);
 
-				cprint(red, green, blue);
-			}
+			pixel_24_bit_t *pixel = &matrix[row][col];
 
-			printf("\n");
-			if (row == 0) break;
+			pixel->blue = ptr->pixels[pixel_offset];
+			pixel->green = ptr->pixels[pixel_offset+1];
+			pixel->red = ptr->pixels[pixel_offset+2];
 		}
 	}
+
+	// todo: reflect the matrix
+
+	return matrix;
+}
+
+// returns pixel_24_bit_t[height][width]
+// free(ret) must be called
+pixel_24_bit_t** pixel_data_to_matrix_bmf_windows_3(bmf_windows_3_t *ptr) {
+	if (ptr->information_header.bi_bit_count != 24) return NULL;
+	if (ptr->information_header.bi_compression != 0) return NULL;
+
+	size_t bytes_per_row = round_to_next_multiple_of_4(
+		ptr->information_header.bi_width * sizeof(pixel_24_bit_t)
+	);
+
+	pixel_24_bit_t **matrix = malloc_matrix(
+		ptr->information_header.bi_height,
+		ptr->information_header.bi_width
+	);
+
+	for (uint16_t row = 0; row < ptr->information_header.bi_height; row++) {
+		size_t row_offset = bytes_per_row * row;
+
+		for (uint16_t col = 0; col < ptr->information_header.bi_width; col++) {
+			size_t pixel_offset = row_offset + (col * 3);
+
+			pixel_24_bit_t *pixel = &matrix[row][col];
+
+			pixel->blue = ptr->pixels[pixel_offset];
+			pixel->green = ptr->pixels[pixel_offset+1];
+			pixel->red = ptr->pixels[pixel_offset+2];
+		}
+	}
+
+	// todo: reflect the matrix
+
+	return matrix;
+}
+
+
+void terminal_print_bmf_os_2(bmf_os_2_t *ptr) {
+	pixel_24_bit_t **matrix = pixel_data_to_matrix_bmf_os_2(ptr);
+
+	if (matrix == NULL) {
+		puts("only support bits_per_pixel=24");
+
+		return;
+	}
+
+	for (uint16_t y = 0; y < ptr->information_header.bi_height; y++) {
+		for (uint16_t x = 0; x < ptr->information_header.bi_width; x++) {
+			pixel_24_bit_t *pixel = &matrix[y][x];
+
+			cprint(pixel->red, pixel->green, pixel->blue);
+		}
+
+		printf("\n");
+	}
+
+	free_matrix(matrix, ptr->information_header.bi_height);
 }
 
 void terminal_print_bmf_windows_3(bmf_windows_3_t *ptr) {
-	puts("only support bits_per_pixel=24 & bi_compression=BI_RGB");
+	pixel_24_bit_t **matrix = pixel_data_to_matrix_bmf_windows_3(ptr);
 
-	size_t bytes_per_row = round_to_next_multiple_of_4(
-		(ptr->information_header.bi_width * ptr->information_header.bi_bit_count) / 8
-	);
+	if (matrix == NULL) {
+		puts("only support bits_per_pixel=24 & bi_compression=BI_RGB");
 
-	if (ptr->information_header.bi_bit_count == 24 && ptr->information_header.bi_compression == 0) {
-		for (uint16_t row = ptr->information_header.bi_height - 1; row >= 0; row--) {
-			size_t row_offset = ptr->pxlen - 
-				((ptr->information_header.bi_height - row) * bytes_per_row);
-
-			for (uint16_t col = 0; col < ptr->information_header.bi_width; col++) {
-				size_t color_byte_offset = row_offset + (col * 3);
-
-				uint8_t blue = ptr->pixels[color_byte_offset];
-				uint8_t green = ptr->pixels[color_byte_offset + 1];
-				uint8_t red = ptr->pixels[color_byte_offset + 2];
-
-				cprint(red, green, blue);
-			}
-
-			printf("\n");
-			if (row == 0) break;
-		}
+		return;
 	}
+
+	for (uint16_t y = 0; y < ptr->information_header.bi_height; y++) {
+		for (uint16_t x = 0; x < ptr->information_header.bi_width; x++) {
+			pixel_24_bit_t *pixel = &matrix[y][x];
+
+			cprint(pixel->red, pixel->green, pixel->blue);
+		}
+
+		printf("\n");
+	}
+
+	free_matrix(matrix, ptr->information_header.bi_height);
+}
+
+void free_matrix(pixel_24_bit_t **matrix, uint16_t height) {
+	for (uint16_t i = 0; i < height; i++) {
+		free(matrix[i]);
+	}
+
+	free(matrix);
+}
+
+pixel_24_bit_t** malloc_matrix(uint16_t height, uint16_t width) {
+	pixel_24_bit_t** matrix = malloc(height * sizeof(pixel_24_bit_t*));
+
+	for (uint16_t i = 0; i < height; i++) {
+		matrix[i] = malloc(width * sizeof(pixel_24_bit_t));
+	}
+
+	return matrix;
 }
 
 void cprint(uint8_t red, uint8_t green, uint8_t blue) {

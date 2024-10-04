@@ -160,7 +160,7 @@ void terminal_print_bmf_windows_3(bmf_windows_3_t *ptr) {
 		(ptr->information_header.bi_width * ptr->information_header.bi_bit_count) / 8
 	);
 
-	if (ptr->information_header.bi_bit_count == 24) {
+	if (ptr->information_header.bi_bit_count == 24 && ptr->information_header.bi_compression == 0) {
 		for (uint16_t row = ptr->information_header.bi_height - 1; row >= 0; row--) {
 			size_t row_offset = ptr->pxlen - 
 				((ptr->information_header.bi_height - row) * bytes_per_row);

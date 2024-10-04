@@ -108,11 +108,26 @@ void fill_n_rows_in_col(
 	uint16_t n
 );
 
+void fill_n_cols_in_row(
+	pixel_24_bit_t **matrix,
+	pixel_24_bit_t pixel,
+	uint16_t row,
+	uint16_t offset,
+	uint16_t n
+);
+
 void linear_gradient_left_to_right(
 	pixel_24_bit_t **matrix,
 	uint16_t height,
 	uint16_t startcol,
 	uint16_t endcol
+);
+
+void linear_gradient_top_to_bottom(
+	pixel_24_bit_t **matrix,
+	uint16_t width,
+	uint16_t startrow,
+	uint16_t endrow
 );
 
 pixel_24_bit_t interpolate(pixel_24_bit_t a, pixel_24_bit_t b, double fraction);

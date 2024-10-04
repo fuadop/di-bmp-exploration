@@ -34,35 +34,67 @@ void draw_square_gradient() {
 	pixel_24_bit_t **matrix = malloc_matrix(ihdr->bi_height, ihdr->bi_width);
 
 	// draw gradient pixels
-	pixel_24_bit_t pixel_1;
-	pixel_24_bit_t pixel_2;
+	pixel_24_bit_t pixel_1; // black (top-left)
+	pixel_24_bit_t pixel_2; // red (top-right)
+	pixel_24_bit_t pixel_3; // blue (bottom-left)
+	pixel_24_bit_t pixel_4; // black (bottom-right)
 	memset(&pixel_1, 0 ,sizeof(pixel_24_bit_t));
 	memset(&pixel_2, 0 ,sizeof(pixel_24_bit_t));
+	memset(&pixel_3, 0 ,sizeof(pixel_24_bit_t));
+	memset(&pixel_4, 0 ,sizeof(pixel_24_bit_t));
 
-	pixel_1.red = 255;
-	pixel_2.blue = 255;
+	pixel_2.red = 255;
+	pixel_3.blue = 255;
 
+	// top-left
 	fill_n_rows_in_col(
 		matrix,
 		pixel_1,
 		0,
 		0,
-		ihdr->bi_height
+		ihdr->bi_height/2
 	);
 
+	// bottom-left
+	fill_n_rows_in_col(
+		matrix,
+		pixel_3,
+		0,
+		ihdr->bi_height/2,
+		ihdr->bi_height/2
+	);
+
+	// top-right
 	fill_n_rows_in_col(
 		matrix,
 		pixel_2,
-		ihdr->bi_width - 1,
+		ihdr->bi_width-1,
 		0,
-		ihdr->bi_height
+		ihdr->bi_height/2
 	);
 
+	// bottom-right
+	fill_n_rows_in_col(
+		matrix,
+		pixel_4,
+		ihdr->bi_width-1,
+		ihdr->bi_height/2,
+		ihdr->bi_height/2
+	);
+
+	// gradients
 	linear_gradient_left_to_right(
 		matrix,
 		ihdr->bi_height,
 		0,
-		ihdr->bi_width - 1
+		ihdr->bi_width-1
+	);
+
+	linear_gradient_top_to_bottom(
+		matrix,
+		ihdr->bi_width,
+		0,
+		ihdr->bi_height-1
 	);
 
 	bmf.pixels = matrix_to_pixel_data(matrix, ihdr->bi_height, ihdr->bi_width);

@@ -24,6 +24,18 @@ void fill_n_rows_in_col(
 	}
 }
 
+void fill_n_cols_in_row(
+	pixel_24_bit_t **matrix,
+	pixel_24_bit_t pixel,
+	uint16_t row,
+	uint16_t offset,
+	uint16_t n
+) {
+	for (uint16_t i = offset; i < (offset + n); i++) {
+		matrix[row][i] = pixel;
+	}
+}
+
 void linear_gradient_left_to_right(
 	pixel_24_bit_t **matrix,
 	uint16_t height,
@@ -59,3 +71,37 @@ void linear_gradient_left_to_right(
 	);
 }
 
+void linear_gradient_top_to_bottom(
+	pixel_24_bit_t **matrix,
+	uint16_t width,
+	uint16_t startrow,
+	uint16_t endrow
+) {
+	if (startrow >= endrow) return;
+
+	uint16_t midrow = (endrow - startrow) / 2;
+
+	if (midrow == 0) return;
+	if (startrow != 0) midrow += startrow; // offset bottom division
+
+	for (uint16_t i = 0; i < width; i++) {
+		pixel_24_bit_t pixel_a = matrix[startrow][i];
+		pixel_24_bit_t pixel_b = matrix[endrow][i];
+
+		matrix[midrow][i] = interpolate(pixel_a, pixel_b, DEFAULT_FRACTION);
+	}
+
+	linear_gradient_top_to_bottom(
+		matrix,
+		width,
+		startrow,
+		midrow
+	);
+
+	linear_gradient_top_to_bottom(
+		matrix,
+		width,
+		midrow,
+		endrow
+	);
+}

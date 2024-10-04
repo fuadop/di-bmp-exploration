@@ -1,13 +1,16 @@
 OBJECT_FILES = build/bmp.o
 WARNING_FLAGS = -Wall -Wno-pragma-pack
 
+.PHONY: clean writer reader
+all: bin/writer bin/reader
+
 writer bin/writer: build/writer.o $(OBJECT_FILES)
 	mkdir -p bin
-	gcc -O0 $(WARNING_FLAGS) -g -o ./bin/writer build/writer.o $(OBJECT_FILES)
+	gcc -O0 $(WARNING_FLAGS) -o ./bin/writer build/writer.o $(OBJECT_FILES)
 
 reader bin/reader: build/reader.o $(OBJECT_FILES)
 	mkdir -p bin
-	gcc -O0 $(WARNING_FLAGS) -g -o ./bin/reader build/reader.o $(OBJECT_FILES)
+	gcc -O0 $(WARNING_FLAGS) -o ./bin/reader build/reader.o $(OBJECT_FILES)
 
 build/writer.o: $(wildcard src/01_bitmap_writer/*.c)
 	mkdir -p build
@@ -21,11 +24,6 @@ build/bmp.o: $(wildcard src/bmp/*.c)
 	mkdir -p build
 	gcc -O0 $(WARNING_FLAGS) -I./src/bmp -c -o ./build/bmp.o $(wildcard src/bmp/*.c)
 
-.PHONY: run
-run:
-	./bin/main
-
-.PHONY: clean
 clean:
 	rm -rf $(wildcard bin/*)
 	rm -rf $(wildcard build/*)

@@ -62,7 +62,6 @@ void decode_to_bmf_os_2(bmf_os_2_t *ptr, FILE *f) {
 	fread(px_ptr, total_px_bytes, 1, f);
 
 	ptr->pixels = px_ptr;
-	ptr->pxlen = total_px_bytes;
 }
 
 void decode_to_bmf_windows_3(bmf_windows_3_t *ptr, FILE *f) {
@@ -95,7 +94,6 @@ void decode_to_bmf_windows_3(bmf_windows_3_t *ptr, FILE *f) {
 	fread(px_ptr, total_px_bytes, 1, f);
 
 	ptr->pixels = px_ptr;
-	ptr->pxlen = total_px_bytes;
 }
 
 void terminal_write_headers_bmf_os_2(bmf_os_2_t *ptr) {
@@ -106,13 +104,12 @@ void terminal_write_headers_bmf_os_2(bmf_os_2_t *ptr) {
 	printf("width=%d\n", ptr->information_header.bi_width);
 	printf("height=%d\n", ptr->information_header.bi_height);
 	printf("bits_per_pixel=%d\n", ptr->information_header.bi_bit_count);
-
-	printf("pxlen_bytes=%zu\n", ptr->pxlen);
 }
 
 void terminal_write_headers_bmf_windows_3(bmf_windows_3_t *ptr) {
 	// print headers to console
 	printf("file_size=%d\n", ptr->file_header.bf_size);
+	printf("pixels_offset=%x\n", ptr->file_header.bf_pixels_offset);
 	printf("file_signature=%c%c\n", ptr->file_header.bf_type[0], ptr->file_header.bf_type[1]);
 
 	printf("width=%u\n", ptr->information_header.bi_width);
@@ -120,8 +117,6 @@ void terminal_write_headers_bmf_windows_3(bmf_windows_3_t *ptr) {
 	printf("bits_per_pixel=%d\n", ptr->information_header.bi_bit_count);
 	printf("bi_compression=%d\n", ptr->information_header.bi_compression);
 	printf("bi_size_image=%d\n", ptr->information_header.bi_size_image);
-
-	printf("pxlen_bytes=%zu\n", ptr->pxlen);
 }
 
 // returns pixel_24_bit_t[height][width]
@@ -188,6 +183,31 @@ pixel_24_bit_t** pixel_data_to_matrix_bmf_windows_3(bmf_windows_3_t *ptr) {
 	matrix_reflect_x_axis(matrix, ptr->information_header.bi_height);
 
 	return matrix;
+}
+
+// free(pixels) must be called
+uint8_t* matrix_to_pixel_data(pixel_24_bit_t **matrix, uint16_t height, uint16_t width) {
+	matrix_reflect_x_axis(matrix, height);
+
+	size_t bytes_per_row = round_to_next_multiple_of_4(width * sizeof(pixel_24_bit_t));
+
+	uint8_t *pixels = malloc(bytes_per_row * height);
+	memset(pixels, 0, bytes_per_row * height);
+
+	for (uint16_t row = 0; row < height; row++) {
+		size_t row_offset = bytes_per_row * row;
+
+		for (uint16_t col = 0; col < width; col++) {
+			size_t col_offset = row_offset + (col * 3);
+			pixel_24_bit_t *pixel = &matrix[row][col];
+
+			pixels[col_offset] = pixel->blue;
+			pixels[col_offset+1] = pixel->green;
+			pixels[col_offset+2] = pixel->red;
+		}
+	}
+
+	return pixels;
 }
 
 void terminal_print_bmf_os_2(bmf_os_2_t *ptr) {
@@ -281,6 +301,14 @@ void free_matrix(pixel_24_bit_t **matrix, uint16_t height) {
 	}
 
 	free(matrix);
+}
+
+void matrix_fill(pixel_24_bit_t **matrix, pixel_24_bit_t pixel, uint16_t height, uint16_t width) {
+	for (uint16_t y = 0; y < height; y++) {
+		for (uint16_t x = 0; x < width; x++) {
+			matrix[y][x] = pixel;
+		}
+	}
 }
 
 pixel_24_bit_t** malloc_matrix(uint16_t height, uint16_t width) {

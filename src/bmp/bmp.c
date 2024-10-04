@@ -162,3 +162,46 @@ void terminal_print_bmf_windows_3(bmf_windows_3_t *ptr) {
 
 	free_matrix(matrix, ptr->information_header.bi_height);
 }
+
+void write_bmp_file(FILE *f, uint16_t width, uint16_t height, pixel_24_bit_t **matrix) {
+	bmf_windows_3_t bmf;
+	memset(&bmf, 0, sizeof(bmf));
+
+	bmfh_t *fhdr = &bmf.file_header;
+	bmih_windows_3_t *ihdr = &bmf.information_header;
+
+	fhdr->bf_type[0] = 'B';
+	fhdr->bf_type[1] = 'M';
+
+	// pixels starts immediately after the headers
+	fhdr->bf_pixels_offset = sizeof(bmfh_t) + sizeof(bmih_windows_3_t);
+
+	ihdr->bi_size = 40;
+	ihdr->bi_width = width;
+	ihdr->bi_height = height;
+	ihdr->bi_planes = 1;
+	ihdr->bi_bit_count = 24;
+
+	bmf.pixels = matrix_to_pixel_data(matrix, height, width);
+	size_t bytes_per_row = round_to_next_multiple_of_4(width * sizeof(pixel_24_bit_t));
+
+	fhdr->bf_size = sizeof(bmfh_t) + sizeof(bmih_windows_3_t) + (bytes_per_row * height);
+
+	// write file header
+	if (fwrite(fhdr, sizeof(bmfh_t), 1, f) != 1) {
+		puts("error writing file");
+	}
+
+	// write info header
+	if (fwrite(ihdr, sizeof(bmih_windows_3_t), 1, f) != 1) {
+		puts("error writing file");
+	}
+
+	// write pixel data
+	if (fwrite(bmf.pixels, bytes_per_row * height, 1, f) != 1) {
+		puts("error writing file");
+	}
+
+	free(bmf.pixels);
+}
+

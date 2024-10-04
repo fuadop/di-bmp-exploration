@@ -83,6 +83,13 @@ void terminal_print_bmf_windows_3(bmf_windows_3_t *ptr);
 void terminal_write_headers_bmf_os_2(bmf_os_2_t *ptr);
 void terminal_write_headers_bmf_windows_3(bmf_windows_3_t *ptr);
 
+void write_bmp_file(
+	FILE *f,
+	uint16_t width,
+	uint16_t height,
+	pixel_24_bit_t **matrix
+);
+
 /** MATRIX METHODS */
 pixel_24_bit_t** pixel_data_to_matrix_bmf_os_2(bmf_os_2_t *ptr);
 pixel_24_bit_t** pixel_data_to_matrix_bmf_windows_3(bmf_windows_3_t *ptr);

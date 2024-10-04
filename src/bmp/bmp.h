@@ -72,17 +72,12 @@ typedef struct {
 	uint8_t red;
 } pixel_24_bit_t;
 
+/** DI-BMP METHODS */
 bool is_bmp_file(FILE *f);
 uint32_t get_bmp_bi_size(FILE *f);
 
 void decode_to_bmf_os_2(bmf_os_2_t *ptr, FILE *f);
 void decode_to_bmf_windows_3(bmf_windows_3_t *ptr, FILE *f);
-
-pixel_24_bit_t** pixel_data_to_matrix_bmf_os_2(bmf_os_2_t *ptr);
-pixel_24_bit_t** pixel_data_to_matrix_bmf_windows_3(bmf_windows_3_t *ptr);
-
-void free_matrix(pixel_24_bit_t **matrix, uint16_t height);
-pixel_24_bit_t** malloc_matrix(uint16_t height, uint16_t width);
 
 void terminal_print_bmf_os_2(bmf_os_2_t *ptr);
 void terminal_print_bmf_windows_3(bmf_windows_3_t *ptr);
@@ -90,6 +85,20 @@ void terminal_print_bmf_windows_3(bmf_windows_3_t *ptr);
 void terminal_write_headers_bmf_os_2(bmf_os_2_t *ptr);
 void terminal_write_headers_bmf_windows_3(bmf_windows_3_t *ptr);
 
+/** MATRIX METHODS */
+pixel_24_bit_t** pixel_data_to_matrix_bmf_os_2(bmf_os_2_t *ptr);
+pixel_24_bit_t** pixel_data_to_matrix_bmf_windows_3(bmf_windows_3_t *ptr);
+
+void free_matrix(pixel_24_bit_t **matrix, uint16_t height);
+pixel_24_bit_t** malloc_matrix(uint16_t height, uint16_t width);
+
+void matrix_reflect_x_axis(pixel_24_bit_t **matrix, uint16_t height);
+void matrix_reflect_y_axis(pixel_24_bit_t **matrix, uint16_t height, uint16_t width);
+
+// void matrix_rotate_forward(deg);
+// void matrix_rotate_backward(deg);
+
+/** UTILITY METHODS */
 size_t round_to_next_multiple_of_4(size_t n);
 void cprint(uint8_t red, uint8_t green, uint8_t blue);
 

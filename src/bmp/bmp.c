@@ -151,7 +151,7 @@ pixel_24_bit_t** pixel_data_to_matrix_bmf_os_2(bmf_os_2_t *ptr) {
 		}
 	}
 
-	// todo: reflect the matrix
+	matrix_reflect_x_axis(matrix, ptr->information_header.bi_height);
 
 	return matrix;
 }
@@ -185,11 +185,10 @@ pixel_24_bit_t** pixel_data_to_matrix_bmf_windows_3(bmf_windows_3_t *ptr) {
 		}
 	}
 
-	// todo: reflect the matrix
+	matrix_reflect_x_axis(matrix, ptr->information_header.bi_height);
 
 	return matrix;
 }
-
 
 void terminal_print_bmf_os_2(bmf_os_2_t *ptr) {
 	pixel_24_bit_t **matrix = pixel_data_to_matrix_bmf_os_2(ptr);
@@ -233,6 +232,47 @@ void terminal_print_bmf_windows_3(bmf_windows_3_t *ptr) {
 	}
 
 	free_matrix(matrix, ptr->information_header.bi_height);
+}
+
+void matrix_reflect_x_axis(pixel_24_bit_t **matrix, uint16_t height) {
+	uint16_t a = 0;
+	uint16_t b = height - 1;
+	pixel_24_bit_t *bucket = NULL;
+
+	while (a < b) {
+		bucket = matrix[a];
+
+		matrix[a] = matrix[b];
+		matrix[b] = bucket;
+
+		// move inwards
+		a++;
+		b--;
+	}
+}
+
+void matrix_reflect_y_axis(pixel_24_bit_t **matrix, uint16_t height, uint16_t width) {
+	for (uint16_t y = 0; y < height; y++) {
+		pixel_24_bit_t *row = matrix[y];
+
+		uint16_t a = 0;
+		uint16_t b = width - 1;
+
+		pixel_24_bit_t bucket;
+		memset(&bucket, 0, sizeof(bucket));
+
+
+		while (a < b) {
+			bucket = row[a];
+
+			row[a] = row[b];
+			row[b] = bucket;
+
+			// move inwards
+			a++;
+			b--;
+		}
+	}
 }
 
 void free_matrix(pixel_24_bit_t **matrix, uint16_t height) {

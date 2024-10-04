@@ -100,6 +100,23 @@ void matrix_reflect_y_axis(pixel_24_bit_t **matrix, uint16_t height, uint16_t wi
 // void matrix_rotate_forward(deg);
 // void matrix_rotate_backward(deg);
 
+void fill_n_rows_in_col(
+	pixel_24_bit_t **matrix,
+	pixel_24_bit_t pixel,
+	uint16_t col,
+	uint16_t offset,
+	uint16_t n
+);
+
+void linear_gradient_left_to_right(
+	pixel_24_bit_t **matrix,
+	uint16_t height,
+	uint16_t startcol,
+	uint16_t endcol
+);
+
+pixel_24_bit_t interpolate(pixel_24_bit_t a, pixel_24_bit_t b, double fraction);
+
 /** UTILITY METHODS */
 size_t round_to_next_multiple_of_4(size_t n);
 void cprint(uint8_t red, uint8_t green, uint8_t blue);

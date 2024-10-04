@@ -4,13 +4,18 @@
 
 void draw_black_bitmap(uint16_t width, uint16_t height);
 void draw_gradient_bitmap(uint16_t width, uint16_t height);
+void draw_poland_flag_bitmap(uint16_t width, uint16_t height);
+void draw_ireland_flag_bitmap(uint16_t width, uint16_t height);
 
 int main() {
 	draw_black_bitmap(10, 10);
 	draw_gradient_bitmap(300, 300);
+	draw_poland_flag_bitmap(320, 200);
+	draw_ireland_flag_bitmap(320, 200);
 
 	return 0;
 }
+
 
 void draw_black_bitmap(uint16_t width, uint16_t height) {
 	pixel_24_bit_t **matrix = malloc_matrix(height, width);
@@ -101,4 +106,76 @@ void draw_gradient_bitmap(uint16_t width, uint16_t height) {
 
 	fclose(f);
 	free_matrix(matrix, height);
+}
+
+void draw_poland_flag_bitmap(uint16_t width, uint16_t height) {
+	pixel_24_bit_t **matrix = malloc_matrix(height, width);
+
+	pixel_24_bit_t pixel;
+	memset(&pixel, 255, sizeof(pixel_24_bit_t)); // white color
+
+	for (uint16_t row = 0; row < height; row++) {
+		if (row >= (height/2)) {
+			pixel.red = 255;
+			pixel.blue = 0;
+			pixel.green = 0;
+		}
+
+		fill_n_cols_in_row(
+			matrix,
+			pixel,
+			row,
+			0,
+			width
+		);
+	}
+
+	FILE *f = fopen("./assets/c_crafted_poland_flag.bmp", "wb");
+
+	write_bmp_file(f, width, height, matrix);
+
+	fclose(f);
+	free_matrix(matrix, height);
+}
+
+void draw_ireland_flag_bitmap(uint16_t width, uint16_t height) {
+	pixel_24_bit_t **matrix = malloc_matrix(height, width);
+
+	pixel_24_bit_t pixel;
+	memset(&pixel, 0, sizeof(pixel_24_bit_t));
+
+	uint16_t section_1_end = (width / 3);
+	uint16_t section_2_end = section_1_end * 2;
+
+	for (uint16_t col = 0; col < width; col++) {
+		if (col <= section_1_end) {
+			pixel.red = 0;
+			pixel.green = 0x9a;
+			pixel.blue = 0x49;
+		} else if (col <= section_2_end) {
+			pixel.red = 0xff;
+			pixel.green = 0xff;
+			pixel.blue = 0xff;
+		} else {
+			pixel.red = 0xff;
+			pixel.green = 0x79;
+			pixel.blue = 0x00;
+		}
+
+		fill_n_rows_in_col(
+			matrix,
+			pixel,
+			col,
+			0,
+			height
+		);
+	}
+
+	FILE *f = fopen("./assets/c_crafted_ireland_flag.bmp", "wb");
+
+	write_bmp_file(f, width, height, matrix);
+
+	fclose(f);
+	free_matrix(matrix, height);
+
 }

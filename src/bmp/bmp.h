@@ -1,6 +1,8 @@
 #ifndef BMP_H
 #define BMP_H
 
+#include "psf.h"
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -172,6 +174,13 @@ uint16_t triangle_perimiter(coordinate_t a, coordinate_t b, coordinate_t c);
 
 coordinate_t clerp(coordinate_t a, coordinate_t b, double t);
 coordinate_t* quadbezier(coordinate_t a, coordinate_t b, coordinate_t c);
+
+/** GLYPHS */
+coordinate_t* write_glyph_to_coordinate(
+	coordinate_t c,
+	uint8_t glyph,
+	psf_t *psf
+);
 
 /** UTILITY METHODS */
 size_t round_to_next_multiple_of_4(size_t n);

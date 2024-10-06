@@ -185,6 +185,7 @@ void draw_ireland_flag_bitmap(uint16_t width, uint16_t height) {
 void draw_brazil_flag_bitmap(uint16_t width, uint16_t height) {
 	pixel_24_bit_t **matrix = malloc_matrix(height, width);
 
+	/*pixel_24_bit_t red_pixel = {.red=0xff, .green=0x00, .blue=0x00};*/
 	pixel_24_bit_t blue_pixel = {.red=0x01, .green=0x21, .blue=0x69};
 	pixel_24_bit_t green_pixel = {.red=0x00, .green=0x95, .blue=0x39};
 	pixel_24_bit_t white_pixel = {.red=0xff, .green=0xff, .blue=0xff};
@@ -293,11 +294,11 @@ void draw_brazil_flag_bitmap(uint16_t width, uint16_t height) {
 			blue_pixel
 		);
 
-		// draw curve
+		// draw curve (globe band)
 		uint16_t height = 15;
 		for (uint16_t i = 0; i < height; i++) {
 			coordinate_t p0 = {.x=centre.x-radius+1, .y=centre.y+i};
-			coordinate_t p1 = {.x=centre.x, .y=centre.y-radius+1+i};
+			coordinate_t p1 = {.x=centre.x, .y=centre.y-radius+20+i};
 			coordinate_t p2 = {.x=centre.x+radius-1, .y=centre.y+i};
 
 			coordinate_t *curve = quadbezier(p0, p1, p2);
@@ -311,9 +312,48 @@ void draw_brazil_flag_bitmap(uint16_t width, uint16_t height) {
 			free(curve);
 		}
 
-		// todo: write text
+		// write text on band
+		FILE *f = fopen("./fonts/zap-vga09.psf", "rb");
+		if (is_psf1_file(f)) {
+			psf_t psf;
+
+			decode_to_psf1(&psf, f);
+
+			char *content = "ORDEM E PROGRESSO";
+			coordinate_t c = { .x=centre.x-radius-9, .y=centre.y+8};
+
+			for (uint16_t i = 0; i < strlen(content); i++) {
+				if (content[i] == ' ') {
+					c.x += 4;
+					/*c.y = i < 6 ? c.y - 4 : c.y + 2;*/
+					continue;
+				}
+
+				coordinate_t *glyph = write_glyph_to_coordinate(
+					c,
+					content[i],
+					&psf
+				);
+
+				fill_coordinates(
+					matrix,
+					glyph,
+					(8 * psf.header.glyph_size),
+					green_pixel
+				);
+
+				c.x += 8;
+				c.y = i < 7 ? c.y - 4 : c.y + 2;
+			}
+
+			free(psf.raw_glyphs);
+		}
+
+		fclose(f);
 
 		free(circle);
+
+		matrix[0][0] = green_pixel;
 	}
 
 	FILE *f = fopen("./assets/c_crafted_brazil_flag.bmp", "wb");

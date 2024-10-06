@@ -105,3 +105,20 @@ void linear_gradient_top_to_bottom(
 		endrow
 	);
 }
+
+void fill_coordinates(
+	pixel_24_bit_t **matrix,
+	coordinate_t* coords,
+	uint16_t coordslen,
+	pixel_24_bit_t pixel
+) {
+	coordinate_t c;
+
+	for (uint16_t i = 0; i < coordslen; i++) {
+		c = coords[i];
+
+		/*printf("x=%d y=%d\n", c.x, c.y);*/
+		matrix[c.y][c.x] = pixel;
+	}
+	/*puts("end");*/
+}

@@ -4,12 +4,14 @@
 
 void draw_black_bitmap(uint16_t width, uint16_t height);
 void draw_gradient_bitmap(uint16_t width, uint16_t height);
+void draw_brazil_flag_bitmap(uint16_t width, uint16_t height);
 void draw_poland_flag_bitmap(uint16_t width, uint16_t height);
 void draw_ireland_flag_bitmap(uint16_t width, uint16_t height);
 
 int main() {
 	draw_black_bitmap(10, 10);
 	draw_gradient_bitmap(300, 300);
+	draw_brazil_flag_bitmap(320, 200);
 	draw_poland_flag_bitmap(320, 200);
 	draw_ireland_flag_bitmap(320, 200);
 
@@ -177,5 +179,70 @@ void draw_ireland_flag_bitmap(uint16_t width, uint16_t height) {
 
 	fclose(f);
 	free_matrix(matrix, height);
+}
 
+void draw_brazil_flag_bitmap(uint16_t width, uint16_t height) {
+	pixel_24_bit_t **matrix = malloc_matrix(height, width);
+
+	pixel_24_bit_t blue_pixel = {.red=0x01, .green=0x21, .blue=0x69};
+	pixel_24_bit_t green_pixel = {.red=0x00, .green=0x95, .blue=0x39};
+	pixel_24_bit_t yellow_pixel = {.red=0xfe, .green=0xdd, .blue=0x00};
+
+	matrix_fill(matrix, green_pixel, height, width); // background
+
+	// todo: manipulate matrix
+	coordinate_t vertex_a = {.x= width/2, .y=0};
+	coordinate_t vertex_c = {.x= width/2, .y=height-1};
+
+	coordinate_t vertex_b_left = {.x= 0, .y=height/2};
+	coordinate_t vertex_b_right = {.x= width-1, .y=height/2};
+
+	// first triangle
+	{
+		coordinate_t *triangle = draw_triangle(
+			vertex_a,
+			vertex_c,
+			vertex_b_left
+		);
+
+		fill_coordinates(
+			matrix,
+			triangle,
+			triangle_perimiter(vertex_a, vertex_c, vertex_b_left),
+			yellow_pixel
+		);
+
+		// todo: fill triangle
+
+		// after triangle draw and fill
+		free(triangle);
+	}
+
+	// second triangle
+	{
+		coordinate_t *triangle = draw_triangle(
+			vertex_a,
+			vertex_c,
+			vertex_b_right
+		);
+
+		fill_coordinates(
+			matrix,
+			triangle,
+			triangle_perimiter(vertex_a, vertex_c, vertex_b_right),
+			yellow_pixel
+		);
+
+		// todo: fill triangle
+
+		// after triangle draw and fill
+		free(triangle);
+	}
+
+	FILE *f = fopen("./assets/c_crafted_brazil_flag.bmp", "wb");
+
+	write_bmp_file(f, width, height, matrix);
+
+	fclose(f);
+	free_matrix(matrix, height);
 }

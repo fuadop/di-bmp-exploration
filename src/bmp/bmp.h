@@ -70,6 +70,11 @@ typedef struct {
 	uint8_t red;
 } pixel_24_bit_t;
 
+typedef struct {
+	uint16_t x;
+	uint16_t y;
+} coordinate_t;
+
 /** DI-BMP METHODS */
 bool is_bmp_file(FILE *f);
 uint32_t get_bmp_bi_size(FILE *f);
@@ -138,6 +143,19 @@ void linear_gradient_top_to_bottom(
 );
 
 pixel_24_bit_t interpolate(pixel_24_bit_t a, pixel_24_bit_t b, double fraction);
+
+void fill_coordinates(
+	pixel_24_bit_t **matrix,
+	coordinate_t* coords,
+	uint16_t coordslen,
+	pixel_24_bit_t pixel
+);
+
+/** VECTORS */
+uint16_t linelen(coordinate_t a, coordinate_t b);
+coordinate_t* draw_line(coordinate_t a, coordinate_t b);
+coordinate_t* draw_triangle(coordinate_t a, coordinate_t b, coordinate_t c);
+uint16_t triangle_perimiter(coordinate_t a, coordinate_t b, coordinate_t c);
 
 /** UTILITY METHODS */
 size_t round_to_next_multiple_of_4(size_t n);

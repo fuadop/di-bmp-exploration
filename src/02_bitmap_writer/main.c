@@ -1,4 +1,5 @@
 #include "bmp/bmp.h"
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -265,6 +266,33 @@ void draw_brazil_flag_bitmap(uint16_t width, uint16_t height) {
 
 		// after triangle draw and fill
 		free(triangle);
+	}
+
+	// draw circle
+	{
+		// 35% radius kind of
+		uint16_t radius = round(((35.0 / 100) * width) / 2);
+		coordinate_t centre = {.x = width/2, .y=height/2};
+
+		uint16_t circumference = circle_circumference(radius);
+		coordinate_t *circle = draw_circle_bresenham(centre, radius);
+
+		fill_coordinates(
+			matrix,
+			circle,
+			circumference,
+			blue_pixel
+		);
+
+		scanline_polygon_fill(
+			matrix,
+			height,
+			circle,
+			circumference,
+			blue_pixel
+		);
+
+		free(circle);
 	}
 
 	FILE *f = fopen("./assets/c_crafted_brazil_flag.bmp", "wb");

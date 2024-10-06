@@ -160,9 +160,14 @@ void scanline_polygon_fill(
 );
 
 /** VECTORS */
-uint16_t linelen(coordinate_t a, coordinate_t b);
 coordinate_t* draw_line(coordinate_t a, coordinate_t b);
 coordinate_t* draw_triangle(coordinate_t a, coordinate_t b, coordinate_t c);
+
+coordinate_t * draw_circle(coordinate_t c, uint16_t r);
+coordinate_t * draw_circle_bresenham(coordinate_t c, uint16_t r);
+
+uint16_t circle_circumference(uint16_t r);
+uint16_t linelen(coordinate_t a, coordinate_t b);
 uint16_t triangle_perimiter(coordinate_t a, coordinate_t b, coordinate_t c);
 
 /** UTILITY METHODS */

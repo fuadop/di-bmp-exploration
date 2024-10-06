@@ -1,6 +1,7 @@
 #include "bmp.h"
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define Y_DIRECTION_UP 0
 #define Y_DIRECTION_DOWN 1
@@ -13,6 +14,10 @@ uint16_t linelen(coordinate_t a, coordinate_t b) {
 	uint16_t dy =  (uint16_t)abs((int)b.y - (int)a.y) + 1;
 
 	return dx > dy ? dx : dy;
+}
+
+uint16_t circle_circumference(uint16_t r) {
+	return round(2 * r * M_PI);
 }
 
 uint16_t triangle_perimiter(coordinate_t a, coordinate_t b, coordinate_t c) {
@@ -280,6 +285,117 @@ coordinate_t* draw_triangle(coordinate_t a, coordinate_t b, coordinate_t c) {
 	free(coords_side_1);
 	free(coords_side_2);
 	free(coords_side_3);
+
+	return coords;
+}
+
+// free() must be called
+// https://medium.com/@pushpendrajtp99/bresenhams-circle-drawing-algorithm-in-computer-graphics-1f75349649ed
+coordinate_t * draw_circle_bresenham(coordinate_t c, uint16_t r) {
+	coordinate_t *coords = malloc(sizeof(coordinate_t) * circle_circumference(r));
+	memset(coords, 0, sizeof(coordinate_t) * circle_circumference(r));
+
+	int d = 1-r;
+	int x_factor = r;
+	int y_factor = 0;
+
+	size_t index = 0;
+	coordinate_t bucket;
+
+	while (x_factor >= y_factor) {
+		// update all eight octets
+		bucket.x = c.x + x_factor;
+		bucket.y = c.y + y_factor;
+		coords[index] = bucket;
+		index++;
+
+		bucket.x = c.x - x_factor;
+		bucket.y = c.y + y_factor;
+		coords[index] = bucket;
+		index++;
+
+		bucket.x = c.x + x_factor;
+		bucket.y = c.y - y_factor;
+		coords[index] = bucket;
+		index++;
+
+		bucket.x = c.x - x_factor;
+		bucket.y = c.y - y_factor;
+		coords[index] = bucket;
+		index++;
+
+		bucket.x = c.x + y_factor;
+		bucket.y = c.y + x_factor;
+		coords[index] = bucket;
+		index++;
+
+		bucket.x = c.x - y_factor;
+		bucket.y = c.y + x_factor;
+		coords[index] = bucket;
+		index++;
+
+		bucket.x = c.x + y_factor;
+		bucket.y = c.y - x_factor;
+		coords[index] = bucket;
+		index++;
+
+		bucket.x = c.x - y_factor;
+		bucket.y = c.y - x_factor;
+		coords[index] = bucket;
+		index++;
+
+		if (d > 0) {
+			x_factor--;
+			d -= (2 * x_factor) + 1;
+		}
+
+		if (d <= 0) {
+			y_factor++;
+			d += (2 * y_factor) + 1;
+		}
+	}
+
+	return coords;
+}
+
+// free() must be called
+// ! sadly it looks like an ellipse
+coordinate_t * draw_circle(coordinate_t c, uint16_t r) {
+	// circle eqn.: (x-h)^2 + (y-k)^2 = r^2
+	// x will always increment/decrement, so let's make y subject of formula
+	//
+	// y = +/- sqrt(r^2 - (x-h)^2 + k^2) --(1)
+	//
+	// where (h,k) is the centre of the circle
+	// r is the radius of the circle
+
+	coordinate_t *coords = malloc(sizeof(coordinate_t) * circle_circumference(r));
+	memset(coords, 0, sizeof(coordinate_t) * circle_circumference(r));
+
+	uint16_t x_left_offset = c.x - r;
+	uint16_t x_right_offset = c.x + r;
+
+	size_t index = 0;
+	coordinate_t bucket;
+
+	for (uint16_t x = x_left_offset; x < x_right_offset; x++) {
+		uint16_t y = round(
+			sqrt(pow(r, 2) - pow(x-c.x, 2) + pow(c.y, 2))
+		);
+
+		// bottom quadrant
+		bucket.x = x;
+		bucket.y = y;
+		coords[index] = bucket;
+
+		index++;
+
+		// reflect point over the mirror line
+		bucket.y = c.y - (y - c.y);
+		coords[index] = bucket;
+
+		index++;
+	}
 
 	return coords;
 }

@@ -1,4 +1,5 @@
 #include "bmp.h"
+#include <limits.h>
 
 #define DEFAULT_FRACTION 0.5
 
@@ -122,3 +123,31 @@ void fill_coordinates(
 	}
 	/*puts("end");*/
 }
+
+void scanline_polygon_fill(
+	pixel_24_bit_t **matrix,
+	uint16_t height,
+	coordinate_t* polygon,
+	uint16_t polygonlen,
+	pixel_24_bit_t pixel
+) {
+	for (uint16_t y = 0; y < height; y++) {
+		uint16_t x_low = UINT16_MAX;
+		uint16_t x_high = 0;
+
+		for (uint16_t i = 0; i < polygonlen; i++) {
+			coordinate_t *p = &polygon[i];
+			if (p->y == y) {
+				if (p->x < x_low) x_low = p->x;
+				if (p->x > x_high) x_high = p->x;
+			}
+		}
+
+		if (x_low >= x_high) continue;
+
+		for (uint16_t x = x_low+1; x < x_high; x++) {
+			matrix[y][x] = pixel;
+		}
+	}
+}
+

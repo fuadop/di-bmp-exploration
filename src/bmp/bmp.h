@@ -151,6 +151,14 @@ void fill_coordinates(
 	pixel_24_bit_t pixel
 );
 
+void scanline_polygon_fill(
+	pixel_24_bit_t **matrix,
+	uint16_t height,
+	coordinate_t* polygon,
+	uint16_t polygonlen,
+	pixel_24_bit_t pixel
+);
+
 /** VECTORS */
 uint16_t linelen(coordinate_t a, coordinate_t b);
 coordinate_t* draw_line(coordinate_t a, coordinate_t b);

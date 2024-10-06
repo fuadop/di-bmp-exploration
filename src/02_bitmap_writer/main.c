@@ -215,14 +215,23 @@ void draw_brazil_flag_bitmap(uint16_t width, uint16_t height) {
 			vertex_b_left
 		);
 
+		uint16_t perimiter = triangle_perimiter(vertex_a, vertex_c, vertex_b_left);
+
 		fill_coordinates(
 			matrix,
 			triangle,
-			triangle_perimiter(vertex_a, vertex_c, vertex_b_left),
+			perimiter,
 			yellow_pixel
 		);
 
-		// todo: fill triangle
+		// fill triangle
+		scanline_polygon_fill(
+			matrix,
+			height,
+			triangle,
+			perimiter,
+			yellow_pixel
+		);
 
 		// after triangle draw and fill
 		free(triangle);
@@ -236,14 +245,23 @@ void draw_brazil_flag_bitmap(uint16_t width, uint16_t height) {
 			vertex_b_right
 		);
 
+		uint16_t perimiter = triangle_perimiter(vertex_a, vertex_c, vertex_b_right);
+
 		fill_coordinates(
 			matrix,
 			triangle,
-			triangle_perimiter(vertex_a, vertex_c, vertex_b_right),
+			perimiter,
 			yellow_pixel
 		);
 
-		// todo: fill triangle
+		// fill triangle
+		scanline_polygon_fill(
+			matrix,
+			height,
+			triangle,
+			perimiter,
+			yellow_pixel
+		);
 
 		// after triangle draw and fill
 		free(triangle);

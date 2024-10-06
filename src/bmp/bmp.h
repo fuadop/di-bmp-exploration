@@ -142,7 +142,7 @@ void linear_gradient_top_to_bottom(
 	uint16_t endrow
 );
 
-pixel_24_bit_t interpolate(pixel_24_bit_t a, pixel_24_bit_t b, double fraction);
+pixel_24_bit_t rgblerp(pixel_24_bit_t a, pixel_24_bit_t b, double fraction);
 
 void fill_coordinates(
 	pixel_24_bit_t **matrix,

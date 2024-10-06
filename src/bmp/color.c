@@ -3,7 +3,7 @@
 
 #define DEFAULT_FRACTION 0.5
 
-pixel_24_bit_t interpolate(pixel_24_bit_t a, pixel_24_bit_t b, double fraction) {
+pixel_24_bit_t rgblerp(pixel_24_bit_t a, pixel_24_bit_t b, double fraction) {
 	pixel_24_bit_t c;
 
 	c.red = a.red + (b.red - a.red) * fraction;
@@ -54,7 +54,7 @@ void linear_gradient_left_to_right(
 		pixel_24_bit_t pixel_a = matrix[i][startcol];
 		pixel_24_bit_t pixel_b = matrix[i][endcol];
 
-		matrix[i][midcol] = interpolate(pixel_a, pixel_b, DEFAULT_FRACTION);
+		matrix[i][midcol] = rgblerp(pixel_a, pixel_b, DEFAULT_FRACTION);
 	}
 
 	linear_gradient_left_to_right(
@@ -89,7 +89,7 @@ void linear_gradient_top_to_bottom(
 		pixel_24_bit_t pixel_a = matrix[startrow][i];
 		pixel_24_bit_t pixel_b = matrix[endrow][i];
 
-		matrix[midrow][i] = interpolate(pixel_a, pixel_b, DEFAULT_FRACTION);
+		matrix[midrow][i] = rgblerp(pixel_a, pixel_b, DEFAULT_FRACTION);
 	}
 
 	linear_gradient_top_to_bottom(

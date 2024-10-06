@@ -399,3 +399,34 @@ coordinate_t * draw_circle(coordinate_t c, uint16_t r) {
 
 	return coords;
 }
+
+coordinate_t* quadbezier(coordinate_t a, coordinate_t b, coordinate_t c) {
+	coordinate_t *coords = malloc(
+		sizeof(coordinate_t) * triangle_perimiter(a, b, c)
+	);
+
+	uint16_t index = 0;
+
+	for (double t = 0; t <= 1; t += 0.005) {
+		coordinate_t l0 = clerp(a, b, t);
+		coordinate_t l1 = clerp(b, c, t);
+
+		coordinate_t q0 = clerp(l0, l1, t);
+
+		coords[index] = q0;
+
+		index++;
+	}
+
+	return coords;
+}
+
+coordinate_t clerp(coordinate_t a, coordinate_t b, double t) {
+	coordinate_t c;
+
+	c.x = a.x + round((double)(b.x - a.x) * t);
+	c.y = a.y + round((double)(b.y - a.y) * t);
+
+	return c;
+}
+

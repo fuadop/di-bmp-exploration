@@ -170,6 +170,9 @@ uint16_t circle_circumference(uint16_t r);
 uint16_t linelen(coordinate_t a, coordinate_t b);
 uint16_t triangle_perimiter(coordinate_t a, coordinate_t b, coordinate_t c);
 
+coordinate_t clerp(coordinate_t a, coordinate_t b, double t);
+coordinate_t* quadbezier(coordinate_t a, coordinate_t b, coordinate_t c);
+
 /** UTILITY METHODS */
 size_t round_to_next_multiple_of_4(size_t n);
 void cprint(uint8_t red, uint8_t green, uint8_t blue);

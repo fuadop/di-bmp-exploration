@@ -187,6 +187,7 @@ void draw_brazil_flag_bitmap(uint16_t width, uint16_t height) {
 
 	pixel_24_bit_t blue_pixel = {.red=0x01, .green=0x21, .blue=0x69};
 	pixel_24_bit_t green_pixel = {.red=0x00, .green=0x95, .blue=0x39};
+	pixel_24_bit_t white_pixel = {.red=0xff, .green=0xff, .blue=0xff};
 	pixel_24_bit_t yellow_pixel = {.red=0xfe, .green=0xdd, .blue=0x00};
 
 	matrix_fill(matrix, green_pixel, height, width); // background
@@ -268,7 +269,7 @@ void draw_brazil_flag_bitmap(uint16_t width, uint16_t height) {
 		free(triangle);
 	}
 
-	// draw circle
+	// draw globe
 	{
 		// 35% radius kind of
 		uint16_t radius = round(((35.0 / 100) * width) / 2);
@@ -291,6 +292,26 @@ void draw_brazil_flag_bitmap(uint16_t width, uint16_t height) {
 			circumference,
 			blue_pixel
 		);
+
+		// draw curve
+		uint16_t height = 15;
+		for (uint16_t i = 0; i < height; i++) {
+			coordinate_t p0 = {.x=centre.x-radius+1, .y=centre.y+i};
+			coordinate_t p1 = {.x=centre.x, .y=centre.y-radius+1+i};
+			coordinate_t p2 = {.x=centre.x+radius-1, .y=centre.y+i};
+
+			coordinate_t *curve = quadbezier(p0, p1, p2);
+			fill_coordinates(
+				matrix,
+				curve,
+				triangle_perimiter(p0, p1, p2),
+				white_pixel
+			);
+
+			free(curve);
+		}
+
+		// todo: write text
 
 		free(circle);
 	}

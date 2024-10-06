@@ -197,6 +197,16 @@ void draw_brazil_flag_bitmap(uint16_t width, uint16_t height) {
 	coordinate_t vertex_b_left = {.x= 0, .y=height/2};
 	coordinate_t vertex_b_right = {.x= width-1, .y=height/2};
 
+	// add 10% padding to edge vertexes
+	double h_padding = (10.0/100.0) * width;
+	double v_padding = (10.0/100.0) * height;
+
+	vertex_a.y += v_padding;
+	vertex_c.y -= v_padding;
+
+	vertex_b_left.x += h_padding;
+	vertex_b_right.x -= h_padding;
+
 	// first triangle
 	{
 		coordinate_t *triangle = draw_triangle(

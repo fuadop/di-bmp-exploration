@@ -43,13 +43,22 @@ typedef struct {
 	uint32_t bi_height; // number of rows
 	uint16_t bi_planes; // 1
 	uint16_t bi_bit_count; // bits per pixel (1, 4, 8, 16, 24, 32)
-	uint32_t bi_compression; // one of (BI_RGB, BI_RLE8,)
+	uint32_t bi_compression; // one of (BI_RGB, BI_RLE8, BI_RLE4, BI_BITFIELDS)
 	uint32_t bi_size_image; // zero for BI_RGB
 	uint32_t bi_x_pels_per_meter; // 0
 	uint32_t bi_y_pels_per_meter; // 0
 	uint32_t bi_clr_used; // number of colors used
 	uint32_t bi_clr_important; // number of important colors
 } bmih_windows_3_t;
+
+
+/** COLOR TABLE */
+typedef struct {
+	uint8_t blue;
+	uint8_t green;
+	uint8_t red;
+	uint8_t reserved;
+} bmf_rgbquad_t;
 
 /** FILE STRUCTURES */
 
@@ -64,9 +73,10 @@ typedef struct {
 typedef struct {
 	bmfh_t file_header;
 	bmih_windows_3_t information_header;
-	// todo: color table
+	bmf_rgbquad_t *color_table;
 	uint8_t *pixels;
 } bmf_windows_3_t;
+
 
 /** UTILITY STRUCTURES */
 typedef struct {

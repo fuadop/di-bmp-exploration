@@ -37,22 +37,52 @@ pixel_24_bit_t** pixel_data_to_matrix_bmf_os_2(bmf_os_2_t *ptr) {
 // returns pixel_24_bit_t[height][width]
 // free(ret) must be called
 pixel_24_bit_t** pixel_data_to_matrix_bmf_windows_3(bmf_windows_3_t *ptr) {
-	if (ptr->information_header.bi_bit_count != 24) return NULL;
-	if (ptr->information_header.bi_compression != 0) return NULL;
+	uint32_t bi_width = ptr->information_header.bi_width;
+	uint32_t bi_height = ptr->information_header.bi_height;
+	uint16_t bi_bit_count = ptr->information_header.bi_bit_count;
+	uint32_t bi_compression = ptr->information_header.bi_compression;
+
+	if (bi_bit_count == 8) {
+		pixel_24_bit_t **matrix = malloc_matrix(bi_height, bi_width);
+
+		for (uint32_t y = 0; y < bi_height; y++) {
+			for (uint32_t x = 0; x < bi_width; x++) {
+				pixel_24_bit_t *pixel = &matrix[y][x];
+
+				uint8_t clr_index = ptr->pixels[(bi_width * y) + x];
+
+				if (ptr->color_table != NULL) {
+					bmf_rgbquad_t *clr = &ptr->color_table[clr_index];
+
+					pixel->red = clr->red;
+					pixel->blue = clr->blue;
+					pixel->green = clr->green;
+
+					continue;
+				}
+
+				pixel->red = pixel->blue = pixel->green = clr_index;
+			}
+		}
+
+		matrix_reflect_x_axis(matrix, bi_height);
+
+		return matrix;
+	}
+
+	if (bi_bit_count != 24) return NULL;
+	if (bi_compression != 0) return NULL;
 
 	size_t bytes_per_row = round_to_next_multiple_of_4(
-		ptr->information_header.bi_width * sizeof(pixel_24_bit_t)
+		bi_width * sizeof(pixel_24_bit_t)
 	);
 
-	pixel_24_bit_t **matrix = malloc_matrix(
-		ptr->information_header.bi_height,
-		ptr->information_header.bi_width
-	);
+	pixel_24_bit_t **matrix = malloc_matrix(bi_height, bi_width);
 
-	for (uint16_t row = 0; row < ptr->information_header.bi_height; row++) {
+	for (uint32_t row = 0; row < bi_height; row++) {
 		size_t row_offset = bytes_per_row * row;
 
-		for (uint16_t col = 0; col < ptr->information_header.bi_width; col++) {
+		for (uint32_t col = 0; col < bi_width; col++) {
 			size_t pixel_offset = row_offset + (col * 3);
 
 			pixel_24_bit_t *pixel = &matrix[row][col];
@@ -63,7 +93,7 @@ pixel_24_bit_t** pixel_data_to_matrix_bmf_windows_3(bmf_windows_3_t *ptr) {
 		}
 	}
 
-	matrix_reflect_x_axis(matrix, ptr->information_header.bi_height);
+	matrix_reflect_x_axis(matrix, bi_height);
 
 	return matrix;
 }

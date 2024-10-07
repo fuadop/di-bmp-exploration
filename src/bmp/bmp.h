@@ -10,6 +10,9 @@
 
 // 4 bytes
 #define BMIH_SIZE 4
+#define CHANNEL_RED 0
+#define CHANNEL_GREEN 1
+#define CHANNEL_BLUE 2
 
 /** FILE HEADER */
 
@@ -122,6 +125,21 @@ pixel_24_bit_t** matrix_rotate_forward(
 // width and height must be swapped in the headers after this operation
 // free_matrix() must be called on output matrix
 pixel_24_bit_t** matrix_rotate_backward(
+	pixel_24_bit_t **matrix,
+	uint16_t height,
+	uint16_t width
+);
+
+// free_matrix() must be called on output matrix
+pixel_24_bit_t** matrix_extract_single_channel(
+	pixel_24_bit_t **matrix,
+	uint16_t height,
+	uint16_t width,
+	uint8_t channel
+);
+
+// free_matrix() must be called on output matrix
+pixel_24_bit_t** matrix_convert_to_grayscale(
 	pixel_24_bit_t **matrix,
 	uint16_t height,
 	uint16_t width

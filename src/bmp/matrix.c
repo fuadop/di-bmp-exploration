@@ -150,7 +150,7 @@ pixel_24_bit_t** matrix_rotate_forward(
 		}
 	}
 
-	free(matrix); // release the old matrix
+	free_matrix(matrix, height); // release the old matrix
 
 	return new_matrix;
 }
@@ -170,6 +170,54 @@ pixel_24_bit_t** matrix_rotate_backward(
 		height,
 		width
 	);
+}
+
+pixel_24_bit_t** matrix_extract_single_channel(
+	pixel_24_bit_t **matrix,
+	uint16_t height,
+	uint16_t width,
+	uint8_t channel
+) {
+	pixel_24_bit_t **new_matrix = malloc_matrix(height, width);
+
+	for (uint16_t y = 0; y < height; y++) {
+		for (uint16_t x = 0; x < width; x++) {
+			pixel_24_bit_t pixel = matrix[y][x];
+
+			if (channel == CHANNEL_RED) pixel.blue = pixel.green = pixel.red;
+			if (channel == CHANNEL_BLUE) pixel.green = pixel.red = pixel.blue;
+			if (channel == CHANNEL_GREEN) pixel.blue = pixel.red = pixel.green;
+
+			new_matrix[y][x] = pixel;
+		}
+	}
+
+	return new_matrix;
+}
+
+// free_matrix() must be called
+pixel_24_bit_t** matrix_convert_to_grayscale(
+	pixel_24_bit_t **matrix,
+	uint16_t height,
+	uint16_t width
+) {
+	pixel_24_bit_t **new_matrix = malloc_matrix(height, width);
+
+	for (uint16_t y = 0; y < height; y++) {
+		for (uint16_t x = 0; x < width; x++) {
+			pixel_24_bit_t pixel = matrix[y][x];
+
+			uint8_t grayscale = (pixel.red + pixel.blue + pixel.green) / 3;
+
+			pixel.red = pixel.blue = pixel.green = grayscale;
+
+			new_matrix[y][x] = pixel;
+		}
+	}
+
+	free_matrix(matrix, height);
+
+	return new_matrix;
 }
 
 void free_matrix(pixel_24_bit_t **matrix, uint16_t height) {

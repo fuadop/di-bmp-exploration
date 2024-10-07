@@ -8,8 +8,8 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	char *action = argv[2];
-	char *input_file_path = argv[1];
+	char *action = argv[1];
+	char *input_file_path = argv[2];
 
 	FILE *inf = fopen(input_file_path, "rb");
 	FILE *outf = fopen("./assets/c_bmp_process_output.bmp", "wb");
@@ -44,6 +44,13 @@ int main(int argc, char **argv) {
 
 			bmf.information_header.bi_width = h;
 			bmf.information_header.bi_height = w;
+
+			write_bmp_file(
+				outf,
+				bmf.information_header.bi_width,
+				bmf.information_header.bi_height,
+				matrix
+			);
 		}
 
 		if (strcmp(action, "rotate-backward") == 0) {
@@ -55,14 +62,47 @@ int main(int argc, char **argv) {
 
 			bmf.information_header.bi_width = h;
 			bmf.information_header.bi_height = w;
+
+			write_bmp_file(
+				outf,
+				bmf.information_header.bi_width,
+				bmf.information_header.bi_height,
+				matrix
+			);
 		}
 
-		write_bmp_file(
-			outf,
-			bmf.information_header.bi_width,
-			bmf.information_header.bi_height,
-			matrix
-		);
+		if (strcmp(action, "grayscale") == 0) {
+			matrix = matrix_convert_to_grayscale(matrix, h, w);
+
+			write_bmp_file(outf, w, h, matrix);
+		}
+
+		if (strcmp(action, "split-channels") == 0) {
+			for (uint8_t i = 0; i < 3; i++) {
+				pixel_24_bit_t **channel_matrix = matrix_extract_single_channel(
+					matrix,
+					h,
+					w,
+					i
+				);
+
+				FILE *f = i == CHANNEL_RED ?
+					fopen("./assets/c_bmp_process_channel_red.bmp", "wb") :
+					i == CHANNEL_BLUE ?
+						fopen("./assets/c_bmp_process_channel_blue.bmp", "wb") :
+						fopen("./assets/c_bmp_process_channel_green.bmp", "wb");
+
+				write_bmp_file(
+					f,
+					w,
+					h,
+					channel_matrix
+				);
+
+				free_matrix(channel_matrix, h);
+				fclose(f);
+			}
+		}
 
 		free_matrix(matrix, h);
 	}
@@ -89,6 +129,13 @@ int main(int argc, char **argv) {
 
 			bmf.information_header.bi_width = h;
 			bmf.information_header.bi_height = w;
+
+			write_bmp_file(
+				outf,
+				bmf.information_header.bi_width,
+				bmf.information_header.bi_height,
+				matrix
+			);
 		}
 
 		if (strcmp(action, "rotate-backward") == 0) {
@@ -100,14 +147,47 @@ int main(int argc, char **argv) {
 
 			bmf.information_header.bi_width = h;
 			bmf.information_header.bi_height = w;
+
+			write_bmp_file(
+				outf,
+				bmf.information_header.bi_width,
+				bmf.information_header.bi_height,
+				matrix
+			);
 		}
 
-		write_bmp_file(
-			outf,
-			bmf.information_header.bi_width,
-			bmf.information_header.bi_height,
-			matrix
-		);
+		if (strcmp(action, "grayscale") == 0) {
+			matrix = matrix_convert_to_grayscale(matrix, h, w);
+
+			write_bmp_file(outf, w, h, matrix);
+		}
+
+		if (strcmp(action, "split-channels") == 0) {
+			for (uint8_t i = 0; i < 3; i++) {
+				pixel_24_bit_t **channel_matrix = matrix_extract_single_channel(
+					matrix,
+					h,
+					w,
+					i
+				);
+
+				FILE *f = i == CHANNEL_RED ?
+					fopen("./assets/c_bmp_process_channel_red.bmp", "wb") :
+					i == CHANNEL_BLUE ?
+						fopen("./assets/c_bmp_process_channel_blue.bmp", "wb") :
+						fopen("./assets/c_bmp_process_channel_green.bmp", "wb");
+
+				write_bmp_file(
+					f,
+					w,
+					h,
+					channel_matrix
+				);
+
+				free_matrix(channel_matrix, h);
+				fclose(f);
+			}
+		}
 
 		free_matrix(matrix, h);
 	}

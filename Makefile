@@ -3,7 +3,12 @@ WARNING_FLAGS = -Wall -Wno-pragma-pack
 STATIC_LIB_FLAGS = -L./build/static/ -lbmp
 
 .PHONY: clean writer reader
-all: bin/writer bin/reader
+all: bin/writer bin/reader bin/process
+
+process bin/process: build/process.o $(STATIC_LIBS)
+	mkdir -p bin
+	gcc -O0 $(WARNING_FLAGS) \
+		-o ./bin/process $(STATIC_LIB_FLAGS) ./build/process.o
 
 writer bin/writer: build/writer.o $(STATIC_LIBS)
 	mkdir -p bin
@@ -14,6 +19,11 @@ reader bin/reader: build/reader.o $(STATIC_LIBS)
 	mkdir -p bin
 	gcc -O0 $(WARNING_FLAGS) \
 		-o ./bin/reader $(STATIC_LIB_FLAGS) ./build/reader.o
+
+build/process.o: ./src/03_bitmap_processor/main.c
+	mkdir -p build
+	gcc -O0 $(WARNING_FLAGS) -I./src -c \
+		-o ./build/process.o ./src/03_bitmap_processor/main.c
 
 build/writer.o: ./src/02_bitmap_writer/main.c
 	mkdir -p build

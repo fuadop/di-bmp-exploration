@@ -1,0 +1,7 @@
+CompileFlags:
+  Add:
+    - -Wall
+    - -Wno-pragma-pack
+    - -I../
+  Remove:
+    - -W*

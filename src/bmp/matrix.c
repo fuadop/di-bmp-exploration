@@ -134,6 +134,44 @@ void matrix_reflect_y_axis(pixel_24_bit_t **matrix, uint16_t height, uint16_t wi
 	}
 }
 
+pixel_24_bit_t** matrix_rotate_forward(
+	pixel_24_bit_t **matrix,
+	uint16_t height,
+	uint16_t width
+) {
+	uint16_t new_width = height;
+	uint16_t new_height = width;
+
+	pixel_24_bit_t **new_matrix = malloc_matrix(new_height, new_width);
+
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			new_matrix[x][height-y-1] = matrix[y][x];
+		}
+	}
+
+	free(matrix); // release the old matrix
+
+	return new_matrix;
+}
+
+pixel_24_bit_t** matrix_rotate_backward(
+	pixel_24_bit_t **matrix,
+	uint16_t height,
+	uint16_t width
+) {
+	// same as 3 * matrix_rotate_forward
+	pixel_24_bit_t **rt0 = matrix_rotate_forward(matrix, height, width);
+
+	pixel_24_bit_t **rt1 = matrix_rotate_forward(rt0, width, height);
+
+	return matrix_rotate_forward(
+		rt1,
+		height,
+		width
+	);
+}
+
 void free_matrix(pixel_24_bit_t **matrix, uint16_t height) {
 	for (uint16_t i = 0; i < height; i++) {
 		free(matrix[i]);

@@ -111,8 +111,21 @@ pixel_24_bit_t** malloc_matrix(uint16_t height, uint16_t width);
 void matrix_reflect_x_axis(pixel_24_bit_t **matrix, uint16_t height);
 void matrix_reflect_y_axis(pixel_24_bit_t **matrix, uint16_t height, uint16_t width);
 
-// void matrix_rotate_forward(deg);
-// void matrix_rotate_backward(deg);
+// width and height must be swapped in the headers after this operation
+// free_matrix() must be called on output matrix
+pixel_24_bit_t** matrix_rotate_forward(
+	pixel_24_bit_t **matrix,
+	uint16_t height,
+	uint16_t width
+);
+
+// width and height must be swapped in the headers after this operation
+// free_matrix() must be called on output matrix
+pixel_24_bit_t** matrix_rotate_backward(
+	pixel_24_bit_t **matrix,
+	uint16_t height,
+	uint16_t width
+);
 
 void fill_n_rows_in_col(
 	pixel_24_bit_t **matrix,

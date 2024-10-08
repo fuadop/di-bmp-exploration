@@ -42,7 +42,7 @@ pixel_24_bit_t** pixel_data_to_matrix_bmf_windows_3(bmf_windows_3_t *ptr) {
 	uint16_t bi_bit_count = ptr->information_header.bi_bit_count;
 	uint32_t bi_compression = ptr->information_header.bi_compression;
 
-	if (bi_bit_count == 8) {
+	if (bi_bit_count == 8 || (bi_bit_count == 4 && bi_compression == 2)) {
 		pixel_24_bit_t **matrix = malloc_matrix(bi_height, bi_width);
 
 		for (uint32_t y = 0; y < bi_height; y++) {

@@ -1,4 +1,5 @@
 #include "bmp.h"
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -83,6 +84,7 @@ void decode_to_bmf_windows_3(bmf_windows_3_t *ptr, FILE *f) {
 
 	ptr->color_table = NULL;
 
+	// BI_RLE8
 	if (bi_bit_count == 8 && bi_compression == 1) {
 		// read color table
 		if (bi_clr_used >= 2) {
@@ -104,7 +106,7 @@ void decode_to_bmf_windows_3(bmf_windows_3_t *ptr, FILE *f) {
 
 		// read 2 bytes at a time till end seq (00 01)
 		uint8_t seq[2];
-		uint8_t x, y = 0;
+		uint32_t x, y = 0;
 
 		while (1) {
 			if (fread(seq, 2, 1, f) != 1) {
@@ -156,6 +158,109 @@ void decode_to_bmf_windows_3(bmf_windows_3_t *ptr, FILE *f) {
 				uint8_t *nextaddr = pixels + ((bi_width * y) + x);
 
 				memset(nextaddr, seq[1], seq[0]);
+
+				x += seq[0];
+
+				continue;
+			}
+		}
+
+		ptr->pixels = pixels;
+
+		return;
+	}
+
+	// BI_RLE4
+	if (bi_bit_count == 4 && bi_compression == 2) {
+		// read color table
+		if (bi_clr_used >= 2) {
+			bmf_rgbquad_t *color_table = malloc(sizeof(bmf_rgbquad_t) * bi_clr_used);
+
+			memset(color_table, 0, sizeof(bmf_rgbquad_t) * bi_clr_used);
+
+			fread(color_table, sizeof(bmf_rgbquad_t), bi_clr_used, f);
+
+			ptr->color_table = color_table;
+		}
+
+		fseek(f, px_offset, SEEK_SET);
+
+		uint8_t *pixels = malloc(bi_width * bi_height); // 1 byte per pixel
+
+		memset(pixels, 0, bi_width * bi_height);
+
+		// read 2 bytes at a time till end seq (00 01)
+		uint8_t seq[2];
+		uint32_t x, y = 0;
+
+		while (1) {
+			if (fread(seq, 2, 1, f) != 1) {
+				puts("error reading from input file");
+
+				break;
+			}
+
+			// end of image
+			if (seq[0] == 0 && seq[1] == 1) break;
+
+			// end of  row
+			if (seq[0] == 0 && seq[1] == 0) {
+				x = 0;
+				y++;
+
+				continue;
+			}
+
+			// increment coordinate dx, dy
+			if (seq[0] == 0 && seq[1] == 2) {
+				if (fread(seq, 2, 1, f) != 1) {
+					puts("error reading from input file");
+
+					break;
+				}
+
+				x += seq[0];
+				y += seq[1];
+
+				continue;
+			}
+
+			// read next n pixels
+			if (seq[0] == 0 && seq[1] >= 3) {
+				uint8_t blen = ceil((double)seq[1] / 2);
+
+				uint8_t buffer[blen + (blen%2)];
+				if (fread(buffer, blen+(blen%2), 1, f) != 1) {
+					puts("error reading from input file");
+
+					break;
+				}
+
+				for (uint8_t i = 0; i < seq[1]; i++) {
+					size_t index = (bi_width * y) + x + i;
+					uint8_t bindex = (i/2), bpixel = (i % 2);
+
+					uint8_t pixel_pair = buffer[bindex];
+					uint8_t pixel = bpixel == 0 ? pixel_pair >> 4 : pixel_pair & 0x0f;
+
+					pixels[index] = pixel;
+				}
+
+				x += seq[1];
+
+				continue;
+			}
+
+			// repeat pixel n times
+			if (seq[0] >= 1) {
+				uint8_t pixel_a = seq[1] >> 4;
+				uint8_t pixel_b = seq[1] & 0x0f;
+
+				for (uint8_t i = 0; i < seq[0]; i++) {
+					size_t index = (bi_width * y) + x + i;
+
+					pixels[index] = i % 2 == 0 ? pixel_a : pixel_b;
+				}
 
 				x += seq[0];
 

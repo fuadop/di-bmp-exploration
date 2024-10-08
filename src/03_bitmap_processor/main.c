@@ -189,6 +189,10 @@ int main(int argc, char **argv) {
 			}
 		}
 
+		if (strcmp(action, "decompress") == 0) {
+			write_bmp_file(outf, w, h, matrix);
+		}
+
 		free_matrix(matrix, h);
 	}
 
